@@ -16,12 +16,21 @@ smtp_password = "************"
 sender_email = "monitor@domain.com"
 recipient_email = "user@domain.com"
 
+# Notification Settings
+email_notif = False
+hook_notif = True
+
 
 # SSH log file path
 log_path = "/var/log/auth.log"
 
 # Regular expression to match failed SSH login attempts
-regex_pattern = r"Failed password for.*from (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (\d+)"
+pattern1 = r"Failed password for invalid user (\w+) from (\d+\.\d+\.\d+\.\d+) port (\d+) ssh2"
+pattern2 = r"authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=(\d+\.\d+\.\d+\.\d+)  user=(\w+)"
+pattern3 = r"Failed password for (\w+) from (\d+\.\d+\.\d+\.\d+) port (\d+) ssh2"
+pattern4 = r"Authentication failure for (\w+) from (\d+\.\d+\.\d+\.\d+)"
+
+
 
 # Get hostname of server
 hostname = socket.gethostname()
@@ -53,7 +62,7 @@ def call_webhook(username, ip_address, port, hostname):
         "attachments": [
             {
                 "title": "SSH Failed Login To Server {}".format(hostname),
-                "text": "Failed SSH login attempt by user {} from IP address {} on port {} at {}".format(
+                "text": "User: {} \n\nIP address: {} \n\nPort: {} \n\nTime: {}".format(
                     username, ip_address, port, time.strftime("%Y-%m-%d %H:%M:%S")
                 ),
                 "color": "#FF0000"
@@ -86,18 +95,54 @@ def send_email(username, ip_address, port, hostname):
 
 # Start tailing the SSH log file
 for line in tail(log_path):
+    username = ""
     # Check if line matches regex pattern
-    match = re.search(regex_pattern, line)
+    match1 = re.search(pattern1, line)
+    match2 = re.search(pattern2, line)
+    match3 = re.search(pattern3, line)
+    match4 = re.search(pattern4, line)
 
-    if match:
-        # Get IP address and port from regex match
-        ip_address = match.group(1)
-        port = match.group(2)
 
-        # Get user and date/time
-        user = line.split(" ")[8]
-        date_time = line.split(" ")[0] + " " + line.split(" ")[1] + " " + line.split(" ")[2]
+    # If the line matches pattern1
+    if match1:
+        print ("match1")
+        # Get the user, IP address, and port from the matched groups
+        username = match1.group(1)
+        ip_address = match1.group(2)
+        port = match1.group(3)
 
-        # Call webhook with IP address, port, user, date/time, and title
-        call_webhook(user, ip_address, port,hostname)
-        send_email(user, ip_address, port,hostname)
+    
+    # If the line matches pattern2
+    elif match2:
+        print ("match2")
+        # Get the user, IP address from the matched groups
+        username = match2.group(2)
+        ip_address = match2.group(1)
+        port = "unknown"
+        
+
+    # If the line matches pattern3
+    elif match3:
+        print ("match3")
+        # Get the user, IP address, and port from the matched groups
+        username = match3.group(1)
+        ip_address = match3.group(2)
+        port = match3.group(3)
+        
+
+    elif match4:
+        # Get the user and IP address from the matched groups
+        username = match4.group(1)
+        ip_address = match4.group(2)
+        port = "unknown"
+       
+
+
+    if username:
+        # Call the webhook or Email with the user, IP address, and port information
+
+        if hook_notif:
+            call_webhook(username, ip_address, port,hostname)
+        if email_notif:
+            send_email(username, ip_address, port,hostname)    
+
