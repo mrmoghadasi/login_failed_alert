@@ -40,6 +40,19 @@ chmod +x installer.sh
 ./installer.sh
 ```
 
+## New Feature Release 
+
+### v.2
+In this version 3, new patterns have been added to detect other states besides "login failed".
+
+```
+pattern1 = r"Failed password for invalid user (\w+) from (\d+\.\d+\.\d+\.\d+) port (\d+) ssh2"
+pattern2 = r"authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=(\d+\.\d+\.\d+\.\d+)  user=(\w+)"
+pattern3 = r"Failed password for (\w+) from (\d+\.\d+\.\d+\.\d+) port (\d+) ssh2"
+pattern4 = r"Authentication failure for (\w+) from (\d+\.\d+\.\d+\.\d+)"
+```
+
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/) 
