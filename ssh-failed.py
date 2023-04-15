@@ -4,14 +4,16 @@ import time
 import socket
 import smtplib
 import configparser
+from systemd import journal
+
 
 
 config = configparser.ConfigParser()
-config.read("config.ini")
-var_a = config.get("myvars", "var_a")
+config.read("/usr/lib/ssh-failed/config.ini")
+
 
 # Change these to the URL of the webhook you want to call
-webhook_url = config.get("webhook_settings","webhook_url")
+webhook_url = config.get("webhook_settings", "webhook_url")
 
 
 # Change these to your email settings
@@ -23,8 +25,8 @@ sender_email = config.get("email_settings", "sender_email")
 recipient_email = config.get("email_settings", "recipient_email")
 
 # Notification Settings
-email_notif = config.get("script_settings", "email_notif")
-hook_notif = config.get("script_settings", "hook_notif")
+email_notif = config.getboolean("script_settings", "email_notif")
+hook_notif = config.getboolean("script_settings", "hook_notif")
 
 
 # SSH log file path
@@ -35,6 +37,9 @@ pattern1 = r"Failed password for invalid user (\w+) from (\d+\.\d+\.\d+\.\d+) po
 pattern2 = r"authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=(\d+\.\d+\.\d+\.\d+)  user=(\w+)"
 pattern3 = r"Failed password for (\w+) from (\d+\.\d+\.\d+\.\d+) port (\d+) ssh2"
 pattern4 = r"Authentication failure for (\w+) from (\d+\.\d+\.\d+\.\d+)"
+
+
+journal.send("SSH Failed Login Detection Script Running ....")
 
 
 
@@ -111,7 +116,7 @@ for line in tail(log_path):
 
     # If the line matches pattern1
     if match1:
-        print ("match1")
+        journal.send("Failed password for invalid match")
         # Get the user, IP address, and port from the matched groups
         username = match1.group(1)
         ip_address = match1.group(2)
@@ -120,7 +125,7 @@ for line in tail(log_path):
     
     # If the line matches pattern2
     elif match2:
-        print ("match2")
+        journal.send("authentication failures match")
         # Get the user, IP address from the matched groups
         username = match2.group(2)
         ip_address = match2.group(1)
@@ -129,7 +134,7 @@ for line in tail(log_path):
 
     # If the line matches pattern3
     elif match3:
-        print ("match3")
+        journal.send("Failed password match")
         # Get the user, IP address, and port from the matched groups
         username = match3.group(1)
         ip_address = match3.group(2)
@@ -138,6 +143,7 @@ for line in tail(log_path):
 
     elif match4:
         # Get the user and IP address from the matched groups
+        journal.send("Authentication failure match")
         username = match4.group(1)
         ip_address = match4.group(2)
         port = "unknown"
@@ -147,8 +153,8 @@ for line in tail(log_path):
     if username:
         # Call the webhook or Email with the user, IP address, and port information
 
-        if hook_notif:
+        if hook_notif is True:
             call_webhook(username, ip_address, port,hostname)
-        if email_notif:
+        if email_notif is True:
             send_email(username, ip_address, port,hostname)    
 
