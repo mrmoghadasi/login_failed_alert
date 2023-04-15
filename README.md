@@ -23,6 +23,13 @@ cd login_failed_alert
 
 
 3. Edit the configuration variables in the `config.ini` script to match your setup.
+
+The `[script_settings]` section appears to be specifying some general settings for the script that is using this configuration file. It includes settings for email and webhook notifications as well as a path to a log file.
+
+The `[email_settings]` section appears to be configuring the email settings for the script, including the SMTP server to use, the SMTP port number, the SMTP username and password, and the sender and recipient email addresses.
+
+The `[webhook_settings]` section appears to be configuring the webhook settings for the script, including the URL of the webhook to use.
+
 The following configuration variables can be edited in the `ssh-failed-login.py` script:
 
 - `LOG_FILE`: the path to the system log file (default is `/var/log/auth.log` on Ubuntu and Debian)
