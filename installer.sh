@@ -3,6 +3,7 @@
 
 mkdir /usr/lib/ssh-failed
 cp ssh-failed.py /usr/lib/ssh-failed/ssh-failed-login.py
+cp config.sample.ini /usr/lib/ssh-failed/config.ini
 
 
 echo '[Unit]

@@ -3,26 +3,32 @@ import requests
 import time
 import socket
 import smtplib
+import configparser
+
+
+config = configparser.ConfigParser()
+config.read("config.ini")
+var_a = config.get("myvars", "var_a")
 
 # Change these to the URL of the webhook you want to call
-webhook_url = "https://Rocket.Chat/hooks/***********************"
+webhook_url = config.get("webhook_settings","webhook_url")
 
 
 # Change these to your email settings
-smtp_server = "mail.domain.com"
-smtp_port = 587
-smtp_username = "monitor@domain.com"
-smtp_password = "************"
-sender_email = "monitor@domain.com"
-recipient_email = "user@domain.com"
+smtp_server = config.get("email_settings", "smtp_server")
+smtp_port = config.get("email_settings", "smtp_port")
+smtp_username = config.get("email_settings", "smtp_username")
+smtp_password = config.get("email_settings", "smtp_password")
+sender_email = config.get("email_settings", "sender_email")
+recipient_email = config.get("email_settings", "recipient_email")
 
 # Notification Settings
-email_notif = False
-hook_notif = True
+email_notif = config.get("script_settings", "email_notif")
+hook_notif = config.get("script_settings", "hook_notif")
 
 
 # SSH log file path
-log_path = "/var/log/auth.log"
+log_path = config.get("script_settings", "log_path")
 
 # Regular expression to match failed SSH login attempts
 pattern1 = r"Failed password for invalid user (\w+) from (\d+\.\d+\.\d+\.\d+) port (\d+) ssh2"

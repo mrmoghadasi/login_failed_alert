@@ -22,10 +22,12 @@ cd login_failed_alert
 ```
 
 
-3. Edit the configuration variables in the `ssh-failed-login.py` script to match your setup.
+3. Edit the configuration variables in the `config.ini` script to match your setup.
 The following configuration variables can be edited in the `ssh-failed-login.py` script:
 
 - `LOG_FILE`: the path to the system log file (default is `/var/log/auth.log` on Ubuntu and Debian)
+- `email_notif`: enable or disable send email notification
+- `hook_notif`: enable or disable send webhook notification
 - `WEBHOOK_URL`: the URL of the Rocket.Chat webhook to send notifications to (optional)
 - `EMAIL_FROM`: the email address to send notifications from (optional)
 - `EMAIL_TO`: the email address(es) to send notifications to (optional)
